@@ -21,7 +21,7 @@
 
 如果您已部署在 GitHub Pages 或其他 HTTPS 服务器上，可点击以下链接直接使用：
 
-[https://你的用户名.github.io/潜水租记/](https://你的用户名.github.io/潜水租记/)
+[https://jingba0725.github.io/潜水租记/](https://jingba0725.github.io/潜水租记/)
 
 > 提示：建议使用 Safari/Chrome 浏览器，并允许通知权限以获得完整的提醒体验。
 
