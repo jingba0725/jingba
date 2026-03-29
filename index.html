@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="潜水租记">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%232b8c9e'/%3E%3Ctext x='50' y='67' font-size='50' text-anchor='middle' fill='white' font-family='Arial'%3E🤿%3C/text%3E%3C/svg%3E">
+    <title>潜水租记 - 租赁收益管理</title>
+    <style>
+        /* 浅色模式（默认）- 海洋清爽风格 */
+        :root {
+            --bg-primary: #e8f4fc;
+            --bg-card: #ffffff;
+            --bg-input: #f5fafd;
+            --text-primary: #1a3a4a;
+            --text-secondary: #4a6a7a;
+            --text-muted: #7a9aaa;
+            --accent: #0ea5e9;
+            --accent-hover: #0284c7;
+            --accent-light: #e0f2fe;
+            --border: #cce7f5;
+            --border-light: #b3dcf2;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        /* 深色模式 - 深海风格 */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #0a1628;
+                --bg-card: #122640;
+                --bg-input: #0d1f35;
+                --text-primary: #e0f0ff;
+                --text-secondary: #8ab4d9;
+                --text-muted: #5a82a8;
+                --accent: #38bdf8;
+                --accent-hover: #0ea5e9;
+                --accent-light: #1e3a5f;
+                --border: #1e4976;
+                --border-light: #2a5a8c;
+                --success: #34d399;
+                --warning: #fbbf24;
+                --danger: #f87171;
+            }
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg-primary); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 20px 16px 40px; color: var(--text-primary); }
+        .container { max-width: 600px; margin: 0 auto; }
+        .header { margin-bottom: 24px; text-align: center; }
+        .header h1 { font-size: 32px; font-weight: 700; background: linear-gradient(135deg, var(--accent), var(--accent-hover)); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: -0.5px; display: inline-flex; align-items: center; gap: 8px; }
+        .header p { color: var(--text-secondary); font-size: 14px; margin-top: 4px; }
+        .card { background: var(--bg-card); border-radius: 24px; box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1); margin-bottom: 24px; overflow: hidden; border: 1px solid var(--border); }
+        .card-header { padding: 20px 20px 0 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
+        .card-title { font-weight: 600; font-size: 18px; display: flex; align-items: center; gap: 8px; border-left: 4px solid var(--accent); padding-left: 12px; color: var(--text-primary); }
+        .collapse-icon { font-size: 20px; color: var(--accent); transition: transform 0.2s; }
+        .card-content { padding: 0 20px 20px 20px; transition: all 0.2s ease; }
+        .card-content.collapsed { display: none; }
+        .form-row { margin-bottom: 16px; position: relative; }
+        label { font-size: 14px; font-weight: 500; color: var(--text-secondary); display: block; margin-bottom: 6px; }
+        input, select, textarea { width: 100%; padding: 12px 14px; font-size: 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-input); color: var(--text-primary); transition: 0.2s; font-family: inherit; }
+        input::placeholder, textarea::placeholder { color: var(--text-muted); }
+        textarea { font-size: 13px; line-height: 1.4; resize: vertical; min-height: 80px; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(212, 168, 75, 0.2); }
+        .date-group { display: flex; gap: 12px; }
+        .date-group .form-row { flex: 1; }
+        button { background: var(--accent); color: var(--bg-primary); border: none; border-radius: 40px; padding: 14px 18px; font-size: 16px; font-weight: 600; width: 100%; cursor: pointer; transition: 0.2s; margin-top: 8px; }
+        button:active { background: var(--accent-hover); transform: scale(0.97); }
+        .secondary-btn { background: var(--accent-light); color: var(--accent); margin-top: 0; }
+        .secondary-btn:active { background: var(--border-light); }
+        .stock-info { background: var(--accent-light); border-radius: 16px; padding: 12px; margin-top: 10px; display: flex; justify-content: space-between; font-size: 14px; border: 1px solid var(--border); }
+        .stock-info.danger { background: var(--danger); opacity: 0.9; }
+        .badge { background: var(--accent-light); padding: 4px 10px; border-radius: 40px; font-size: 13px; color: var(--accent); }
+        .inventory-card { background: linear-gradient(135deg, var(--accent-light), var(--bg-card)); border-left: 4px solid var(--accent); }
+        .inventory-item { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; padding: 8px 0; border-bottom: 1px dashed var(--border); }
+        .inventory-item:last-child { border-bottom: none; margin-bottom: 0; }
+        .inventory-label { font-weight: 500; color: var(--text-secondary); }
+        .inventory-value { font-weight: 700; font-size: 18px; color: var(--accent); }
+        .text-danger { color: var(--danger) !important; }
+        .text-warning { color: var(--warning) !important; }
+        .inventory-note { font-size: 12px; color: var(--text-muted); margin-top: 8px; text-align: right; }
+        .filter-bar { display: flex; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+        .filter-bar select { flex: 2; padding: 10px; }
+        .filter-bar button { flex: 1; padding: 10px; margin-top: 0; }
+        .transaction-item { background: var(--bg-input); border-radius: 20px; padding: 14px; margin-bottom: 12px; border: 1px solid var(--border); transition: 0.1s; }
+        .transaction-header { display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 8px; flex-wrap: wrap; }
+        .product-name { font-size: 16px; color: var(--text-primary); }
+        .income { color: var(--success); font-weight: 700; }
+        .trans-details { font-size: 13px; color: var(--text-secondary); display: flex; flex-wrap: wrap; gap: 12px; margin-top: 6px; }
+        .empty-msg { text-align: center; color: var(--text-muted); padding: 30px 0; }
+        .month-summary { display: flex; flex-direction: column; gap: 12px; }
+        .month-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        .month-name { font-weight: 500; }
+        .month-total { font-weight: 700; color: var(--success); }
+        .inline-buttons { display: flex; gap: 12px; margin-top: 10px; }
+        .add-option-hint { font-size: 12px; color: var(--text-muted); margin-top: 4px; padding-left: 8px; }
+        .auto-fill-badge { background: rgba(124, 184, 124, 0.2); color: var(--success); font-size: 11px; padding: 2px 8px; border-radius: 12px; margin-left: 8px; }
+        .reminder-item { background: #1e3a5f; border-left: 3px solid var(--warning); padding: 12px; margin-bottom: 10px; border-radius: 12px; }
+        .reminder-date { font-weight: 600; color: var(--warning); }
+        .reminder-actions { margin-top: 8px; display: flex; gap: 8px; }
+        .small-btn { background: var(--border); padding: 6px 12px; font-size: 12px; border-radius: 20px; width: auto; margin-top: 0; color: var(--text-primary); }
+        .small-btn.danger { background: var(--danger); color: white; opacity: 0.8; }
+        .stock-hint { font-size: 13px; background: var(--accent-light); padding: 8px 12px; border-radius: 12px; margin-top: 6px; color: var(--text-secondary); border-left: 3px solid var(--accent); }
+        .stock-hint strong { color: var(--accent); }
+        .stock-hint.warning { border-left-color: var(--warning); }
+        .stock-setting-item { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; }
+        .stock-setting-item input { flex: 2; padding: 10px; font-size: 14px; }
+        .stock-setting-item button { width: auto; padding: 10px 16px; margin-top: 0; font-size: 14px; }
+        .stock-setting-item .stock-value { flex: 1; text-align: center; font-weight: 600; color: var(--text-secondary); }
+        .summary-switch { display: flex; gap: 8px; margin-bottom: 16px; }
+        .summary-switch button { flex: 1; margin-top: 0; padding: 8px 12px; font-size: 14px; background: var(--accent-light); color: var(--accent); border: 1px solid var(--border); }
+        .summary-switch button.active { background: var(--accent); color: var(--bg-primary); border-color: var(--accent); }
+        @media (max-width: 480px) {
+            body { padding: 16px 12px 30px; }
+            .stock-setting-item { flex-wrap: wrap; }
+            .stock-setting-item input, .stock-setting-item button { flex: 1; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🤿 潜水租记</h1>
+        <p>潜水装备租赁 · 收益轻松追踪</p>
+    </div>
+
+    <div class="card" id="addTransactionCard">
+        <div class="card-header" style="cursor: default; padding-bottom: 0;">
+            <div class="card-title">➕ 新增租赁记录</div>
+        </div>
+        <div class="card-content" style="padding-top: 0;">
+            <div class="form-row">
+                <label>型号 *</label>
+                <input type="text" id="modelInput" list="modelList" placeholder="选择或输入型号" autocomplete="off">
+                <datalist id="modelList"></datalist>
+                <div class="add-option-hint">💡 可直接输入新型号，系统会提示先设置库存。自动带出最近的价格和押金</div>
+                <div id="modelStockHint" class="stock-hint" style="display: none;"></div>
+            </div>
+            <div class="form-row">
+                <label>颜色</label>
+                <input type="text" id="colorInput" list="colorList" placeholder="选择或输入新颜色" autocomplete="off">
+                <datalist id="colorList"></datalist>
+                <div class="add-option-hint">🎨 可直接输入新颜色，下次自动加入下拉列表</div>
+            </div>
+            <div class="form-row">
+                <label>承租人</label>
+                <textarea id="renterInput" rows="3" placeholder="姓名 / 联系方式 / 备注信息" style="font-size: 13px;"></textarea>
+                <div class="add-option-hint">👤 记录租用者信息，便于联系</div>
+            </div>
+            <div class="date-group">
+                <div class="form-row">
+                    <label>起始日期</label>
+                    <input type="date" id="startDate">
+                    <div id="dateStockHint" class="stock-hint" style="display: none;"></div>
+                </div>
+                <div class="form-row">
+                    <label>结束日期</label>
+                    <input type="date" id="endDate">
+                </div>
+            </div>
+            <div class="form-row">
+                <label>单日租赁价格 (¥) <span id="priceAutoHint" class="auto-fill-badge" style="display: none;">自动填充</span></label>
+                <input type="number" id="dailyPrice" placeholder="0.00" step="0.01" value="0">
+            </div>
+            <div class="form-row">
+                <label>租赁押金 (¥) <span id="depositAutoHint" class="auto-fill-badge" style="display: none;">自动填充</span></label>
+                <input type="number" id="deposit" placeholder="0.00" step="0.01" value="0">
+            </div>
+            <div class="form-row">
+                <label>本次租赁数量</label>
+                <input type="number" id="rentalQty" placeholder="1" value="1" min="1">
+            </div>
+            <div class="stock-info" id="stockPreview">
+                <span>📊 剩余库存: --</span>
+                <span class="badge" id="stockStatus">未设置</span>
+            </div>
+            <button id="saveTransactionBtn">💾 保存租赁交易</button>
+            <div class="inline-buttons">
+                <button id="clearFormBtn" class="secondary-btn" type="button">🗑 清空表单</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" id="stockSettingsCard">
+        <div class="card-header" id="stockSettingsHeader">
+            <div class="card-title">⚙️ 型号库存设置</div>
+            <span class="collapse-icon" id="stockSettingsIcon">▶</span>
+        </div>
+        <div class="card-content" id="stockSettingsContent">
+            <div id="stockSettingsContainer">
+                <div class="empty-msg">暂无型号，点击下方按钮添加型号库存</div>
+            </div>
+            <div class="inline-buttons" style="margin-top: 12px;">
+                <button id="addModelStockBtn" class="secondary-btn">➕ 添加型号库存</button>
+            </div>
+            <div class="add-option-hint">💡 在这里设置各型号的总库存。添加租赁记录时会自动读取此处的库存值。</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header" style="cursor: default; padding-bottom: 0;">
+            <div class="card-title">📤 数据管理</div>
+        </div>
+        <div class="card-content" style="padding-top: 0;">
+            <div class="inline-buttons" style="margin-top: 0;">
+                <button id="exportJsonBtn" class="secondary-btn">📦 导出JSON备份</button>
+                <button id="exportCsvBtn" class="secondary-btn">📄 导出CSV交易记录</button>
+            </div>
+            <div class="inline-buttons" style="margin-top: 8px;">
+                <button id="importJsonBtn" class="secondary-btn">📂 导入JSON备份</button>
+                <input type="file" id="importFileInput" accept=".json" style="display: none;">
+            </div>
+            <div class="add-option-hint">💡 导出的JSON文件包含所有数据，可用于备份或分享给他人。导入时将完全替换当前数据。</div>
+        </div>
+    </div>
+
+    <div class="card inventory-card" id="inventoryCard">
+        <div class="card-header" id="inventoryHeader">
+            <div class="card-title">📦 型号库存分析</div>
+            <span class="collapse-icon" id="inventoryIcon">▼</span>
+        </div>
+        <div class="card-content" id="inventoryContentWrapper">
+            <div id="inventoryContent"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header" id="reminderHeader">
+            <div class="card-title">⏰ 智能提醒</div>
+            <span class="collapse-icon" id="reminderIcon">▼</span>
+        </div>
+        <div class="card-content" id="reminderContentWrapper">
+            <div id="reminderNotificationArea">
+                <button id="requestNotifyPermissionBtn" class="secondary-btn" style="margin-bottom: 12px;">🔔 允许通知权限</button>
+            </div>
+            <div id="reminderListContainer">
+                <div class="empty-msg">暂无即将到来的提醒</div>
+            </div>
+            <div class="add-option-hint" style="margin-top: 8px;">💡 系统会在租赁起始日前3、4、5天自动提醒（需授权）。也可点击"添加到日历"生成文件导入iOS日历。</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header" style="cursor: default; padding-bottom: 0;">
+            <div class="card-title">📋 交易记录 & 筛选</div>
+        </div>
+        <div class="card-content" style="padding-top: 0;">
+            <div class="filter-bar">
+                <select id="modelFilterSelect">
+                    <option value="ALL">所有型号</option>
+                </select>
+                <button id="applyFilterBtn">🔍 按型号筛选</button>
+                <button id="resetFilterBtn" class="secondary-btn">重置</button>
+            </div>
+            <div id="transactionListContainer">
+                <div class="empty-msg">暂无租赁记录，添加一笔吧</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header" style="cursor: default; padding-bottom: 0;">
+            <div class="card-title">📊 收入汇总</div>
+        </div>
+        <div class="card-content" style="padding-top: 0;">
+            <div class="summary-switch">
+                <button id="monthSummaryBtn" class="active">📅 按月汇总</button>
+                <button id="yearSummaryBtn">📆 按年汇总</button>
+            </div>
+            <div id="summaryContainer"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header" style="cursor: default; padding-bottom: 0;">
+            <div class="card-title">🏷️ 按型号汇总收入</div>
+        </div>
+        <div class="card-content" style="padding-top: 0;">
+            <div id="modelSummaryContainer">
+                <div class="empty-msg">暂无数据</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ========== 常量定义 ==========
+const STORAGE_KEYS = {
+    TRANSACTIONS: 'dive_rental_transactions',
+    MODEL_OPTIONS: 'dive_model_options',
+    COLOR_OPTIONS: 'dive_color_options',
+    PRICE_HISTORY: 'dive_price_history',
+    DEPOSIT_HISTORY: 'dive_deposit_history',
+    SUMMARY_MODE: 'summary_mode',
+    REMINDERS: 'sent_reminders',
+    MODEL_STOCK: 'dive_model_stock',
+    COLLAPSE: {
+        INVENTORY: 'inventory_collapsed',
+        REMINDER: 'reminder_collapsed',
+        STOCK_SETTINGS: 'stock_settings_collapsed'
+    }
+};
+
+const DEFAULT_STOCK = {
+    "MK25 EVO": 5,
+    "Descent MK3": 3
+};
+
+const REMIND_DAYS = [3, 4, 5];
+
+// ========== 状态管理 ==========
+const state = {
+    transactions: [],
+    modelOptions: new Set(),
+    colorOptions: new Set(),
+    priceHistory: new Map(),
+    depositHistory: new Map(),
+    modelStockMap: new Map(),
+    sentReminders: new Set(),
+    summaryMode: 'month',
+    currentFilterModel: 'ALL',
+    collapsed: {
+        inventory: true,
+        reminder: true,
+        stockSettings: true
+    }
+};
+
+// ========== DOM 元素缓存 ==========
+const $ = (sel) => document.querySelector(sel);
+const $$ = (sel) => document.querySelectorAll(sel);
+const getEl = (id) => document.getElementById(id);
+
+const elements = {
+    // 表单
+    modelInput: getEl('modelInput'),
+    colorInput: getEl('colorInput'),
+    renterInput: getEl('renterInput'),
+    startDate: getEl('startDate'),
+    endDate: getEl('endDate'),
+    dailyPrice: getEl('dailyPrice'),
+    deposit: getEl('deposit'),
+    rentalQty: getEl('rentalQty'),
+    saveBtn: getEl('saveTransactionBtn'),
+    clearBtn: getEl('clearFormBtn'),
+    // 提示
+    priceAutoHint: getEl('priceAutoHint'),
+    depositAutoHint: getEl('depositAutoHint'),
+    modelStockHint: getEl('modelStockHint'),
+    dateStockHint: getEl('dateStockHint'),
+    stockPreview: getEl('stockPreview'),
+    inventoryContent: getEl('inventoryContent'),
+    // 列表
+    modelList: getEl('modelList'),
+    colorList: getEl('colorList'),
+    transactionList: getEl('transactionListContainer'),
+    modelFilterSelect: getEl('modelFilterSelect'),
+    summaryContainer: getEl('summaryContainer'),
+    modelSummaryContainer: getEl('modelSummaryContainer'),
+    // 折叠面板
+    inventoryHeader: getEl('inventoryHeader'),
+    inventoryContentWrapper: getEl('inventoryContentWrapper'),
+    inventoryIcon: getEl('inventoryIcon'),
+    reminderHeader: getEl('reminderHeader'),
+    reminderContentWrapper: getEl('reminderContentWrapper'),
+    reminderIcon: getEl('reminderIcon'),
+    stockSettingsHeader: getEl('stockSettingsHeader'),
+    stockSettingsContent: getEl('stockSettingsContent'),
+    stockSettingsIcon: getEl('stockSettingsIcon'),
+    stockSettingsContainer: getEl('stockSettingsContainer'),
+    // 按钮
+    applyFilterBtn: getEl('applyFilterBtn'),
+    resetFilterBtn: getEl('resetFilterBtn'),
+    exportJsonBtn: getEl('exportJsonBtn'),
+    exportCsvBtn: getEl('exportCsvBtn'),
+    importJsonBtn: getEl('importJsonBtn'),
+    importFileInput: getEl('importFileInput'),
+    addModelStockBtn: getEl('addModelStockBtn'),
+    requestNotifyPermissionBtn: getEl('requestNotifyPermissionBtn'),
+    monthSummaryBtn: getEl('monthSummaryBtn'),
+    yearSummaryBtn: getEl('yearSummaryBtn'),
+    reminderListContainer: getEl('reminderListContainer')
+};
+
+// ========== 工具函数 ==========
+const utils = {
+    escapeHtml: (str) => {
+        if (!str) return '';
+        const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;' };
+        return str.replace(/[&<>]/g, m => map[m]);
+    },
+
+    escapeCsvField: (field) => {
+        if (field === undefined || field === null) return "";
+        const str = String(field);
+        if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+            return '"' + str.replace(/"/g, '""') + '"';
+        }
+        return str;
+    },
+
+    formatDate: (date) => date.toISOString().slice(0, 10),
+
+    parseDate: (str) => str ? new Date(str) : null,
+
+    calculateDays: (startStr, endStr) => {
+        if (!startStr || !endStr) return 0;
+        const start = utils.parseDate(startStr);
+        const end = utils.parseDate(endStr);
+        if (!start || !end || isNaN(start) || isNaN(end)) return 0;
+        const diffDays = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
+        return diffDays > 0 ? diffDays : 1;
+    },
+
+    computeIncome: (dailyPrice, days, qty) => dailyPrice * days * qty,
+
+    debounce: (fn, delay) => {
+        let timer;
+        return (...args) => {
+            clearTimeout(timer);
+            timer = setTimeout(() => fn.apply(this, args), delay);
+        };
+    }
+};
+
+// ========== 核心业务逻辑 ==========
+const core = {
+    // 获取当前占用数量
+    getCurrentOccupied: (model) => {
+        if (!model) return 0;
+        const today = utils.formatDate(new Date());
+        return state.transactions
+            .filter(t => t.model === model && t.startDate <= today && t.endDate >= today)
+            .reduce((sum, t) => sum + (t.rentalQty || 0), 0);
+    },
+
+    // 获取起始日期前5天的占用
+    getOccupiedBeforeStart: (model, startDate) => {
+        if (!model || !startDate) return 0;
+        const start = utils.parseDate(startDate);
+        const threshold = new Date(start);
+        threshold.setDate(threshold.getDate() - 5);
+        const thresholdStr = utils.formatDate(threshold);
+        return state.transactions
+            .filter(t => t.model === model && t.endDate >= thresholdStr)
+            .reduce((sum, t) => sum + (t.rentalQty || 0), 0);
+    },
+
+    getTotalStock: (model) => state.modelStockMap.get(model) || 0,
+
+    getAbsoluteStock: (model) => {
+        if (!model) return 0;
+        return Math.max(0, core.getTotalStock(model) - core.getCurrentOccupied(model));
+    },
+
+    getRelativeStock: (model, startDate) => {
+        if (!model || !startDate) return null;
+        const totalStock = core.getTotalStock(model);
+        const occupied = core.getOccupiedBeforeStart(model, startDate);
+        return Math.max(0, totalStock - occupied);
+    },
+
+    // 重建历史价格/押金记录
+    rebuildHistory: () => {
+        state.priceHistory.clear();
+        state.depositHistory.clear();
+        const sorted = [...state.transactions]
+            .sort((a, b) => new Date(b.createdAt || b.id) - new Date(a.createdAt || a.id));
+        
+        for (const trans of sorted) {
+            if (!state.priceHistory.has(trans.model) && trans.dailyPrice > 0) {
+                state.priceHistory.set(trans.model, trans.dailyPrice);
+            }
+            if (!state.depositHistory.has(trans.model) && trans.deposit > 0) {
+                state.depositHistory.set(trans.model, trans.deposit);
+            }
+        }
+    }
+};
+
+// ========== 渲染函数 ==========
+const render = {
+    dropdowns: () => {
+        // 收集选项
+        state.transactions.forEach(t => {
+            if (t.model?.trim()) state.modelOptions.add(t.model.trim());
+            if (t.color?.trim()) state.colorOptions.add(t.color.trim());
+        });
+        state.modelStockMap.forEach((_, model) => model && state.modelOptions.add(model));
+
+        // 渲染型号下拉
+        elements.modelList.innerHTML = '';
+        Array.from(state.modelOptions).sort().forEach(model => {
+            const opt = document.createElement('option');
+            opt.value = model;
+            elements.modelList.appendChild(opt);
+        });
+
+        // 渲染颜色下拉
+        elements.colorList.innerHTML = '';
+        Array.from(state.colorOptions).sort().forEach(color => {
+            const opt = document.createElement('option');
+            opt.value = color;
+            elements.colorList.appendChild(opt);
+        });
+    },
+
+    stockSettings: () => {
+        const { stockSettingsContainer } = elements;
+        if (state.modelStockMap.size === 0) {
+            stockSettingsContainer.innerHTML = '<div class="empty-msg">暂无型号，点击下方按钮添加型号库存</div>';
+            return;
+        }
+
+        stockSettingsContainer.innerHTML = Array.from(state.modelStockMap.entries())
+            .sort((a, b) => a[0].localeCompare(b[0]))
+            .map(([model, stock]) => `
+                <div class="stock-setting-item" data-model="${utils.escapeHtml(model)}">
+                    <input type="text" class="stock-model-name" value="${utils.escapeHtml(model)}" placeholder="型号" style="flex:1.5;">
+                    <input type="number" class="stock-quantity" value="${stock}" placeholder="总库存" style="flex:1;" step="1" min="0">
+                    <button class="small-btn secondary-btn update-stock-btn" style="width:auto;">保存</button>
+                    <button class="small-btn danger delete-stock-btn" style="width:auto;">删除</button>
+                </div>
+            `).join('');
+
+        // 绑定事件
+        stockSettingsContainer.querySelectorAll('.update-stock-btn').forEach(btn => {
+            btn.onclick = () => {
+                const item = btn.closest('.stock-setting-item');
+                const oldModel = item.dataset.model;
+                const newModel = item.querySelector('.stock-model-name').value.trim();
+                let quantity = parseInt(item.querySelector('.stock-quantity').value, 10) || 0;
+
+                if (!newModel) return alert('型号不能为空');
+
+                if (oldModel !== newModel) state.modelStockMap.delete(oldModel);
+                state.modelStockMap.set(newModel, quantity);
+                
+                storage.saveStock();
+                render.stockSettings();
+                render.dropdowns();
+                hints.refresh();
+            };
+        });
+
+        stockSettingsContainer.querySelectorAll('.delete-stock-btn').forEach(btn => {
+            btn.onclick = () => {
+                const model = btn.closest('.stock-setting-item').dataset.model;
+                if (confirm(`确定删除型号 "${model}" 的库存设置吗？`)) {
+                    state.modelStockMap.delete(model);
+                    storage.saveStock();
+                    render.stockSettings();
+                    render.dropdowns();
+                    hints.refresh();
+                }
+            };
+        });
+    },
+
+    transactions: () => {
+        const { transactionList, modelFilterSelect } = elements;
+        let filtered = state.currentFilterModel === 'ALL' 
+            ? state.transactions 
+            : state.transactions.filter(t => t.model === state.currentFilterModel);
+
+        if (filtered.length === 0) {
+            transactionList.innerHTML = '<div class="empty-msg">✨ 没有符合条件的租赁记录</div>';
+            return;
+        }
+
+        transactionList.innerHTML = filtered.map(trans => {
+            const days = utils.calculateDays(trans.startDate, trans.endDate);
+            return `
+                <div class="transaction-item">
+                    <div class="transaction-header">
+                        <span class="product-name">${utils.escapeHtml(trans.model)} ${trans.color ? `(${utils.escapeHtml(trans.color)})` : ''}</span>
+                        <span class="income">+¥${trans.rentalIncome.toFixed(2)}</span>
+                    </div>
+                    <div class="trans-details">
+                        <span>📅 ${trans.startDate} ~ ${trans.endDate} (${days}天)</span>
+                        <span>💰 ¥${trans.dailyPrice}/天 × ${trans.rentalQty}件</span>
+                        <span>🔐 押金: ¥${trans.deposit.toFixed(2)}</span>
+                        <span>👤 ${trans.renter ? utils.escapeHtml(trans.renter) : '未填写'}</span>
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
+                        <button class="secondary-btn delete-trans-btn" data-id="${trans.id}" style="width: auto; padding: 6px 14px; font-size:13px;">删除</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // 删除事件
+        transactionList.querySelectorAll('.delete-trans-btn').forEach(btn => {
+            btn.onclick = () => {
+                const id = parseInt(btn.dataset.id);
+                if (confirm('删除此笔租赁记录？')) {
+                    state.transactions = state.transactions.filter(t => t.id !== id);
+                    storage.save();
+                    ui.refresh();
+                }
+            };
+        });
+    },
+
+    modelFilter: () => {
+        const modelSet = new Set();
+        state.transactions.forEach(t => { if (t.model?.trim()) modelSet.add(t.model); });
+        
+        const cur = elements.modelFilterSelect.value;
+        elements.modelFilterSelect.innerHTML = '<option value="ALL">所有型号</option>';
+        Array.from(modelSet).sort().forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = m;
+            opt.textContent = m;
+            elements.modelFilterSelect.appendChild(opt);
+        });
+
+        if (cur !== 'ALL' && !modelSet.has(cur)) {
+            state.currentFilterModel = 'ALL';
+            elements.modelFilterSelect.value = 'ALL';
+        } else if (cur !== 'ALL') {
+            elements.modelFilterSelect.value = cur;
+        }
+    },
+
+    summary: () => {
+        const { summaryContainer } = elements;
+        const mode = state.summaryMode;
+        
+        if (mode === 'month') {
+            const monthMap = new Map();
+            state.transactions.forEach(trans => {
+                if (!trans.endDate) return;
+                const date = utils.parseDate(trans.endDate);
+                if (isNaN(date)) return;
+                const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                monthMap.set(yearMonth, (monthMap.get(yearMonth) || 0) + (trans.rentalIncome || 0));
+            });
+
+            if (monthMap.size === 0) {
+                summaryContainer.innerHTML = '<div class="empty-msg">暂无租赁收入数据</div>';
+                return;
+            }
+
+            summaryContainer.innerHTML = '<div class="month-summary">' +
+                Array.from(monthMap.keys()).sort().reverse()
+                    .map(month => `
+                        <div class="month-item">
+                            <span class="month-name">📅 ${month}</span>
+                            <span class="month-total">¥ ${monthMap.get(month).toFixed(2)}</span>
+                        </div>
+                    `).join('') + '</div>';
+        } else {
+            const yearMap = new Map();
+            state.transactions.forEach(trans => {
+                if (!trans.endDate) return;
+                const date = utils.parseDate(trans.endDate);
+                if (isNaN(date)) return;
+                yearMap.set(date.getFullYear().toString(), (yearMap.get(date.getFullYear().toString()) || 0) + (trans.rentalIncome || 0));
+            });
+
+            if (yearMap.size === 0) {
+                summaryContainer.innerHTML = '<div class="empty-msg">暂无租赁收入数据</div>';
+                return;
+            }
+
+            summaryContainer.innerHTML = '<div class="month-summary">' +
+                Array.from(yearMap.keys()).sort().reverse()
+                    .map(year => `
+                        <div class="month-item">
+                            <span class="month-name">📆 ${year}年</span>
+                            <span class="month-total">¥ ${yearMap.get(year).toFixed(2)}</span>
+                        </div>
+                    `).join('') + '</div>';
+        }
+    },
+
+    modelSummary: () => {
+        const modelMap = new Map();
+        state.transactions.forEach(trans => {
+            const model = trans.model?.trim() || "未分类型号";
+            modelMap.set(model, (modelMap.get(model) || 0) + (trans.rentalIncome || 0));
+        });
+
+        if (modelMap.size === 0) {
+            elements.modelSummaryContainer.innerHTML = '<div class="empty-msg">暂无型号收入数据</div>';
+            return;
+        }
+
+        elements.modelSummaryContainer.innerHTML = '<div class="month-summary">' +
+            Array.from(modelMap.entries())
+                .map(([model, total]) => `
+                    <div class="month-item">
+                        <span class="month-name">🏷️ ${utils.escapeHtml(model)}</span>
+                        <span class="month-total">¥ ${total.toFixed(2)}</span>
+                    </div>
+                `).join('') + '</div>';
+    },
+
+    inventoryCard: () => {
+        const model = elements.modelInput.value.trim();
+        const startDate = elements.startDate.value;
+        const totalStock = core.getTotalStock(model);
+
+        if (!model) {
+            elements.inventoryContent.innerHTML = '<div class="empty-msg">请在上方选择型号以查看库存分析</div>';
+            return;
+        }
+
+        const currentOccupied = core.getCurrentOccupied(model);
+        const absoluteStock = Math.max(0, totalStock - currentOccupied);
+        
+        let relativeStock = null;
+        let relativeOccupied = 0;
+        if (startDate) {
+            relativeOccupied = core.getOccupiedBeforeStart(model, startDate);
+            relativeStock = Math.max(0, totalStock - relativeOccupied);
+        }
+
+        let html = `
+            <div class="inventory-item"><span class="inventory-label">📌 型号</span><span class="inventory-value">${utils.escapeHtml(model)}</span></div>
+            <div class="inventory-item"><span class="inventory-label">🏭 总库存</span><span class="inventory-value">${totalStock} 件</span></div>
+            <div class="inventory-item"><span class="inventory-label">⚡ 绝对库存 (当前可用)</span><span class="inventory-value ${absoluteStock >= 0 ? '' : 'text-danger'}">${absoluteStock} 件</span></div>
+        `;
+
+        if (relativeStock !== null) {
+            html += `
+                <div class="inventory-item"><span class="inventory-label">🔄 相对库存 (开始日前5天)</span><span class="inventory-value ${relativeStock >= 0 ? '' : 'text-danger'}">${relativeStock} 件</span></div>
+                <div class="inventory-note">📍 相对库存说明：在租赁开始日 ${utils.escapeHtml(startDate)} 前5天，已有 ${relativeOccupied} 件租赁期满释放。<br>此数值为届时可用库存（忽略颜色差异）。</div>`;
+        } else {
+            html += `<div class="inventory-item"><span class="inventory-label">🔄 相对库存 (开始日前5天)</span><span class="inventory-value">请先选择开始日期</span></div>`;
+        }
+
+        elements.inventoryContent.innerHTML = html;
+    },
+
+    reminders: () => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const reminders = [];
+        state.transactions.forEach(trans => {
+            if (!trans.startDate) return;
+            const startDate = utils.parseDate(trans.startDate);
+            startDate.setHours(0, 0, 0, 0);
+            if (startDate <= today) return;
+
+            REMIND_DAYS.forEach(daysBefore => {
+                const remindDate = new Date(startDate);
+                remindDate.setDate(remindDate.getDate() - daysBefore);
+                if (remindDate >= today) {
+                    reminders.push({ trans, daysBefore, remindDate });
+                }
+            });
+        });
+
+        if (reminders.length === 0) {
+            elements.reminderListContainer.innerHTML = '<div class="empty-msg">暂无即将到来的提醒</div>';
+            return;
+        }
+
+        reminders.sort((a, b) => a.remindDate - b.remindDate);
+
+        elements.reminderListContainer.innerHTML = reminders.map(r => `
+            <div class="reminder-item">
+                <div><strong>${utils.escapeHtml(r.trans.model)}</strong> ${r.trans.color ? `(${utils.escapeHtml(r.trans.color)})` : ''}</div>
+                <div class="reminder-date">⏰ 提醒日期：${utils.formatDate(r.remindDate)} (租赁起始日前${r.daysBefore}天)</div>
+                <div class="reminder-actions">
+                    <button class="small-btn secondary-btn calendar-btn" data-id="${r.trans.id}" data-days="${r.daysBefore}">📅 添加到系统日历</button>
+                </div>
+            </div>
+        `).join('');
+
+        // 日历事件
+        elements.reminderListContainer.querySelectorAll('.calendar-btn').forEach(btn => {
+            btn.onclick = () => {
+                const id = parseInt(btn.dataset.id);
+                const days = parseInt(btn.dataset.days);
+                const trans = state.transactions.find(t => t.id === id);
+                if (trans) exports.downloadICS(trans, days);
+            };
+        });
+    }
+};
+
+// ========== 提示信息更新 ==========
+const hints = {
+    modelStock: () => {
+        const model = elements.modelInput.value.trim();
+        const hintDiv = elements.modelStockHint;
+        
+        if (!model) {
+            hintDiv.style.display = 'none';
+            return;
+        }
+
+        const totalStock = core.getTotalStock(model);
+        const absoluteStock = core.getAbsoluteStock(model);
+        const occupied = core.getCurrentOccupied(model);
+
+        hintDiv.style.display = 'block';
+        let html = `<strong>📊 当前绝对库存：</strong> ${absoluteStock} 件（总库存 ${totalStock} - 当前已租 ${occupied}）`;
+        
+        if (totalStock === 0) {
+            hintDiv.classList.add('warning');
+            html += `<br><span class="text-warning">⚠️ 该型号总库存为0，请在下方"型号库存设置"中添加库存</span>`;
+        }
+        hintDiv.innerHTML = html;
+    },
+
+    dateStock: () => {
+        const model = elements.modelInput.value.trim();
+        const startDate = elements.startDate.value;
+        const hintDiv = elements.dateStockHint;
+
+        if (!model || !startDate) {
+            hintDiv.style.display = 'none';
+            return;
+        }
+
+        const totalStock = core.getTotalStock(model);
+        const absoluteStock = core.getAbsoluteStock(model);
+        const relativeStock = core.getRelativeStock(model, startDate);
+
+        hintDiv.style.display = 'block';
+        let html = `<strong>📊 绝对库存：</strong> ${absoluteStock} 件（当前可用）<br>`;
+
+        if (relativeStock !== null) {
+            const occupiedBefore = core.getOccupiedBeforeStart(model, startDate);
+            html += `<strong>🔄 相对库存（开始日前5天）：</strong> ${relativeStock} 件（届时可用，已有 ${occupiedBefore} 件租赁期满释放）`;
+        } else {
+            html += `<strong>🔄 相对库存：</strong> 需选择起始日期`;
+        }
+
+        if (totalStock === 0) {
+            hintDiv.classList.add('warning');
+            html += `<br><span class="text-warning">⚠️ 该型号总库存为0，请在下方"型号库存设置"中添加库存</span>`;
+        }
+        hintDiv.innerHTML = html;
+    },
+
+    stockPreview: () => {
+        const model = elements.modelInput.value.trim();
+        const totalStock = core.getTotalStock(model);
+
+        if (!model) {
+            elements.stockPreview.innerHTML = `<span>📊 剩余库存: --</span><span class="badge">请输入型号</span>`;
+            return;
+        }
+
+        const occupied = core.getCurrentOccupied(model);
+        const remaining = Math.max(0, totalStock - occupied);
+
+        elements.stockPreview.innerHTML = `
+            <span>📊 剩余库存: ${remaining} 件</span>
+            <span class="badge">总库:${totalStock} 当前已租:${occupied}</span>
+        `;
+        elements.stockPreview.classList.toggle('danger', remaining < 0);
+    },
+
+    autoFill: () => {
+        const model = elements.modelInput.value.trim();
+        if (!model) return;
+
+        let priceFilled = false, depositFilled = false;
+
+        if (state.priceHistory.has(model)) {
+            elements.dailyPrice.value = state.priceHistory.get(model);
+            elements.priceAutoHint.style.display = 'inline-block';
+            priceFilled = true;
+        }
+
+        if (state.depositHistory.has(model)) {
+            elements.deposit.value = state.depositHistory.get(model);
+            elements.depositAutoHint.style.display = 'inline-block';
+            depositFilled = true;
+        }
+
+        if (priceFilled || depositFilled) {
+            setTimeout(() => {
+                if (priceFilled) hints.hideHint(elements.priceAutoHint);
+                if (depositFilled) hints.hideHint(elements.depositAutoHint);
+            }, 1500);
+        }
+    },
+
+    hideHint: (el) => {
+        el.style.opacity = '0';
+        setTimeout(() => { el.style.display = 'none'; el.style.opacity = '1'; }, 1500);
+    },
+
+    refresh: () => {
+        hints.modelStock();
+        hints.dateStock();
+        hints.stockPreview();
+        hints.autoFill();
+    }
+};
+
+// ========== 存储管理 ==========
+const storage = {
+    save: () => {
+        localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(state.transactions));
+        localStorage.setItem(STORAGE_KEYS.MODEL_OPTIONS, JSON.stringify(Array.from(state.modelOptions)));
+        localStorage.setItem(STORAGE_KEYS.COLOR_OPTIONS, JSON.stringify(Array.from(state.colorOptions)));
+        localStorage.setItem(STORAGE_KEYS.PRICE_HISTORY, JSON.stringify(Array.from(state.priceHistory.entries())));
+        localStorage.setItem(STORAGE_KEYS.DEPOSIT_HISTORY, JSON.stringify(Array.from(state.depositHistory.entries())));
+        localStorage.setItem(STORAGE_KEYS.SUMMARY_MODE, state.summaryMode);
+        storage.saveReminders();
+        storage.saveStock();
+    },
+
+    saveStock: () => {
+        localStorage.setItem(STORAGE_KEYS.MODEL_STOCK, JSON.stringify(Array.from(state.modelStockMap.entries())));
+    },
+
+    saveReminders: () => {
+        localStorage.setItem(STORAGE_KEYS.REMINDERS, JSON.stringify(Array.from(state.sentReminders)));
+    },
+
+    load: () => {
+        // 加载交易记录
+        const stored = localStorage.getItem(STORAGE_KEYS.TRANSACTIONS);
+        if (stored) {
+            try {
+                state.transactions = JSON.parse(stored).map(t => {
+                    if (t.productName && !t.model) t.model = t.productName;
+                    if (t.rentalIncome === undefined) {
+                        const days = utils.calculateDays(t.startDate, t.endDate);
+                        t.rentalIncome = utils.computeIncome(t.dailyPrice, days, t.rentalQty);
+                    }
+                    return t;
+                });
+            } catch (e) { state.transactions = []; }
+        } else {
+            // 示例数据
+            const s1 = "2025-04-10", e1 = "2025-04-15";
+            state.transactions.push({
+                id: Date.now() + 1, model: "MK25 EVO", color: "黑色", renter: "张三",
+                startDate: s1, endDate: e1, dailyPrice: 120, rentalQty: 2, deposit: 2000,
+                rentalIncome: utils.computeIncome(120, utils.calculateDays(s1, e1), 2),
+                createdAt: new Date().toISOString()
+            });
+            const s2 = "2025-04-20", e2 = "2025-04-25";
+            state.transactions.push({
+                id: Date.now() + 2, model: "Descent MK3", color: "钛灰色", renter: "李四",
+                startDate: s2, endDate: e2, dailyPrice: 80, rentalQty: 1, deposit: 3500,
+                rentalIncome: utils.computeIncome(80, utils.calculateDays(s2, e2), 1),
+                createdAt: new Date().toISOString()
+            });
+        }
+
+        // 加载选项
+        const loadSet = (key, target) => {
+            const data = localStorage.getItem(key);
+            if (data) {
+                try { JSON.parse(data).forEach(item => target.add(item)); } catch (e) {}
+            }
+        };
+        loadSet(STORAGE_KEYS.MODEL_OPTIONS, state.modelOptions);
+        loadSet(STORAGE_KEYS.COLOR_OPTIONS, state.colorOptions);
+
+        // 加载历史记录
+        const loadMap = (key, target) => {
+            const data = localStorage.getItem(key);
+            if (data) {
+                try { JSON.parse(data).forEach(([k, v]) => target.set(k, v)); } catch (e) {}
+            }
+        };
+        loadMap(STORAGE_KEYS.PRICE_HISTORY, state.priceHistory);
+        loadMap(STORAGE_KEYS.DEPOSIT_HISTORY, state.depositHistory);
+
+        // 加载汇总模式
+        const savedMode = localStorage.getItem(STORAGE_KEYS.SUMMARY_MODE);
+        if (savedMode === 'month' || savedMode === 'year') state.summaryMode = savedMode;
+
+        // 加载提醒
+        const remindersData = localStorage.getItem(STORAGE_KEYS.REMINDERS);
+        if (remindersData) {
+            try { state.sentReminders = new Set(JSON.parse(remindersData)); } catch (e) {}
+        }
+
+        // 加载库存
+        const stockData = localStorage.getItem(STORAGE_KEYS.MODEL_STOCK);
+        if (stockData) {
+            try {
+                JSON.parse(stockData).forEach(([model, stock]) => state.modelStockMap.set(model, stock));
+            } catch (e) {}
+        } else {
+            Object.entries(DEFAULT_STOCK).forEach(([model, stock]) => state.modelStockMap.set(model, stock));
+        }
+
+        // 加载折叠状态
+        Object.keys(STORAGE_KEYS.COLLAPSE).forEach(key => {
+            const saved = localStorage.getItem(STORAGE_KEYS.COLLAPSE[key]);
+            if (saved !== null) state.collapsed[key.toLowerCase()] = saved === 'true';
+        });
+
+        // 收集选项
+        state.transactions.forEach(t => {
+            if (t.model) state.modelOptions.add(t.model);
+            if (t.color) state.colorOptions.add(t.color);
+        });
+
+        core.rebuildHistory();
+    }
+};
+
+// ========== UI 刷新 ==========
+const ui = {
+    refresh: () => {
+        render.dropdowns();
+        render.modelFilter();
+        render.transactions();
+        render.summary();
+        render.modelSummary();
+        render.stockSettings();
+        render.reminders();
+        hints.refresh();
+        collapse.apply();
+        notifications.check();
+    },
+
+    clearForm: () => {
+        elements.modelInput.value = '';
+        elements.colorInput.value = '';
+        elements.renterInput.value = '';
+        elements.startDate.value = '';
+        elements.endDate.value = '';
+        elements.dailyPrice.value = '0';
+        elements.deposit.value = '0';
+        elements.rentalQty.value = '1';
+        elements.priceAutoHint.style.display = 'none';
+        elements.depositAutoHint.style.display = 'none';
+        hints.refresh();
+    }
+};
+
+// ========== 折叠面板 ==========
+const collapse = {
+    toggle: (type) => {
+        state.collapsed[type] = !state.collapsed[type];
+        localStorage.setItem(STORAGE_KEYS.COLLAPSE[type.toUpperCase()], state.collapsed[type]);
+        collapse.apply();
+    },
+
+    apply: () => {
+        const applyTo = (header, wrapper, icon, type) => {
+            const isCollapsed = state.collapsed[type];
+            wrapper.classList.toggle('collapsed', isCollapsed);
+            icon.textContent = isCollapsed ? '▶' : '▼';
+        };
+
+        applyTo(elements.inventoryHeader, elements.inventoryContentWrapper, elements.inventoryIcon, 'inventory');
+        applyTo(elements.reminderHeader, elements.reminderContentWrapper, elements.reminderIcon, 'reminder');
+        applyTo(elements.stockSettingsHeader, elements.stockSettingsContent, elements.stockSettingsIcon, 'stocksettings');
+    }
+};
+
+// ========== 通知功能 ==========
+const notifications = {
+    request: () => {
+        if (!("Notification" in window)) return alert("您的浏览器不支持桌面通知");
+        
+        if (Notification.permission === "granted") {
+            alert("通知权限已开启");
+        } else if (Notification.permission !== "denied") {
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    alert("通知权限已开启，将会收到租赁提醒");
+                    notifications.check();
+                    render.reminders();
+                }
+            });
+        } else {
+            alert("通知权限被拒绝，请在浏览器设置中开启");
+        }
+    },
+
+    check: () => {
+        if (Notification.permission !== "granted") return;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        state.transactions.forEach(trans => {
+            if (!trans.startDate) return;
+            const startDate = utils.parseDate(trans.startDate);
+            startDate.setHours(0, 0, 0, 0);
+            if (startDate <= today) return;
+
+            REMIND_DAYS.forEach(daysBefore => {
+                const remindDate = new Date(startDate);
+                remindDate.setDate(remindDate.getDate() - daysBefore);
+                const reminderKey = `${trans.id}_${daysBefore}`;
+
+                if (utils.formatDate(remindDate) === utils.formatDate(today) && !state.sentReminders.has(reminderKey)) {
+                    state.sentReminders.add(reminderKey);
+                    new Notification("📅 租赁提醒", {
+                        body: `型号 ${trans.model} 将于 ${trans.startDate} 开始租赁，请提前准备！`,
+                        tag: reminderKey,
+                        icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%232b8c9e'/%3E%3Ctext x='50' y='67' font-size='50' text-anchor='middle' fill='white' font-family='Arial'%3E🤿%3C/text%3E%3C/svg%3E"
+                    });
+                    storage.saveReminders();
+                }
+            });
+        });
+    }
+};
+
+// ========== 导入导出 ==========
+const exports = {
+    json: () => {
+        const data = {
+            version: "1.0",
+            exportDate: new Date().toISOString(),
+            transactions: state.transactions,
+            modelStock: Array.from(state.modelStockMap.entries()),
+            colorOptions: Array.from(state.colorOptions),
+            priceHistory: Array.from(state.priceHistory.entries()),
+            depositHistory: Array.from(state.depositHistory.entries()),
+            sentReminders: Array.from(state.sentReminders)
+        };
+
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `dive_rental_backup_${new Date().toISOString().slice(0, 10)}.json`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+        alert("✅ JSON备份已导出");
+    },
+
+    csv: () => {
+        if (state.transactions.length === 0) return alert("暂无交易记录，无法导出CSV");
+
+        const headers = ["型号", "颜色", "承租人", "起始日期", "结束日期", "单日价格(¥)", "数量", "押金(¥)", "租赁收入(¥)", "创建时间"];
+        const rows = state.transactions.map(t => [
+            utils.escapeCsvField(t.model || ""),
+            utils.escapeCsvField(t.color || ""),
+            utils.escapeCsvField(t.renter || ""),
+            t.startDate || "",
+            t.endDate || "",
+            t.dailyPrice || 0,
+            t.rentalQty || 0,
+            t.deposit || 0,
+            (t.rentalIncome || 0).toFixed(2),
+            t.createdAt || ""
+        ]);
+
+        const csvContent = ["\uFEFF" + headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `rental_transactions_${new Date().toISOString().slice(0, 10)}.csv`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+        alert(`✅ 已导出 ${state.transactions.length} 条交易记录为CSV文件`);
+    },
+
+    importJSON: (file) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const imported = JSON.parse(e.target.result);
+                if (!imported.transactions || !Array.isArray(imported.transactions)) {
+                    throw new Error("文件格式不正确，缺少 transactions 字段");
+                }
+
+                if (!confirm(`导入将完全替换当前所有数据，包含 ${imported.transactions.length} 条交易记录。确定继续吗？`)) return;
+
+                // 恢复数据
+                state.transactions = imported.transactions.map(t => {
+                    if (t.rentalIncome === undefined) {
+                        const days = utils.calculateDays(t.startDate, t.endDate);
+                        t.rentalIncome = utils.computeIncome(t.dailyPrice, days, t.rentalQty);
+                    }
+                    return t;
+                });
+
+                if (imported.modelStock) {
+                    state.modelStockMap.clear();
+                    imported.modelStock.forEach(([m, s]) => state.modelStockMap.set(m, s));
+                }
+
+                if (imported.colorOptions) {
+                    state.colorOptions.clear();
+                    imported.colorOptions.forEach(c => state.colorOptions.add(c));
+                }
+
+                if (imported.priceHistory) {
+                    state.priceHistory.clear();
+                    imported.priceHistory.forEach(([k, v]) => state.priceHistory.set(k, v));
+                }
+
+                if (imported.depositHistory) {
+                    state.depositHistory.clear();
+                    imported.depositHistory.forEach(([k, v]) => state.depositHistory.set(k, v));
+                }
+
+                if (imported.sentReminders) {
+                    state.sentReminders.clear();
+                    imported.sentReminders.forEach(r => state.sentReminders.add(r));
+                }
+
+                storage.save();
+                ui.refresh();
+                alert(`✅ 导入成功！共导入 ${state.transactions.length} 条交易记录。`);
+            } catch (err) {
+                alert("导入失败：" + err.message);
+            }
+        };
+        reader.readAsText(file);
+    },
+
+    downloadICS: (transaction, daysBefore) => {
+        const startDate = utils.parseDate(transaction.startDate);
+        const remindDate = new Date(startDate);
+        remindDate.setDate(remindDate.getDate() - daysBefore);
+
+        const formatICSDate = (d) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+        
+        const ics = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//潜水租记//提醒日历//CN
+BEGIN:VEVENT
+UID:${transaction.id}-${daysBefore}@diverent
+DTSTAMP:${formatICSDate(new Date())}
+DTSTART;VALUE=DATE:${remindDate.getFullYear()}${String(remindDate.getMonth() + 1).padStart(2, '0')}${String(remindDate.getDate()).padStart(2, '0')}
+SUMMARY:📌 租赁提醒：${transaction.model}
+DESCRIPTION:租赁起始日：${transaction.startDate}\\n租赁结束日：${transaction.endDate}\\n数量：${transaction.rentalQty}件\\n押金：¥${transaction.deposit}\\n承租人：${transaction.renter || '未填写'}\\n请提前准备装备。
+END:VEVENT
+END:VCALENDAR`;
+
+        const blob = new Blob([ics], { type: 'text/calendar' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `reminder_${transaction.id}_${daysBefore}.ics`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+    }
+};
+
+// ========== 添加交易 ==========
+const addTransaction = () => {
+    const model = elements.modelInput.value.trim();
+    if (!model) return alert('请填写型号');
+
+    const color = elements.colorInput.value.trim();
+    const renter = elements.renterInput.value.trim();
+    const startDate = elements.startDate.value;
+    const endDate = elements.endDate.value;
+
+    if (!startDate || !endDate) return alert('请选择租赁起止日期');
+    if (utils.parseDate(startDate) > utils.parseDate(endDate)) return alert('结束日期不能早于起始日期');
+
+    const dailyPrice = parseFloat(elements.dailyPrice.value);
+    if (isNaN(dailyPrice) || dailyPrice < 0) return alert('请输入有效的单日价格');
+
+    let rentalQty = parseInt(elements.rentalQty.value, 10) || 1;
+    if (rentalQty < 1) rentalQty = 1;
+
+    const totalStock = core.getTotalStock(model);
+    const occupied = core.getCurrentOccupied(model);
+
+    if (totalStock === 0 && !confirm(`型号"${model}"的总库存为0，是否继续保存？（建议先在库存设置中添加库存）`)) {
+        return;
+    }
+
+    if (rentalQty > (totalStock - occupied) && totalStock > 0) {
+        return alert(`当前型号"${model}"剩余库存不足! 当前可用: ${totalStock - occupied} 件`);
+    }
+
+    const days = utils.calculateDays(startDate, endDate);
+    const rentalIncome = utils.computeIncome(dailyPrice, days, rentalQty);
+
+    state.modelOptions.add(model);
+    if (color) state.colorOptions.add(color);
+
+    state.transactions.push({
+        id: Date.now(),
+        model, color, renter, startDate, endDate,
+        dailyPrice, rentalQty,
+        deposit: parseFloat(elements.deposit.value) || 0,
+        rentalIncome,
+        createdAt: new Date().toISOString()
+    });
+
+    storage.save();
+    core.rebuildHistory();
+    ui.refresh();
+    ui.clearForm();
+    alert('✅ 租赁记录已保存');
+};
+
+// ========== 事件绑定 ==========
+const events = {
+    bind: () => {
+        // 表单操作
+        elements.saveBtn.onclick = addTransaction;
+        elements.clearBtn.onclick = ui.clearForm;
+
+        // 筛选
+        elements.applyFilterBtn.onclick = () => {
+            state.currentFilterModel = elements.modelFilterSelect.value;
+            render.transactions();
+        };
+        elements.resetFilterBtn.onclick = () => {
+            state.currentFilterModel = 'ALL';
+            elements.modelFilterSelect.value = 'ALL';
+            render.transactions();
+        };
+
+        // 数据管理
+        elements.exportJsonBtn.onclick = exports.json;
+        elements.exportCsvBtn.onclick = exports.csv;
+        elements.importJsonBtn.onclick = () => elements.importFileInput.click();
+        elements.importFileInput.onchange = (e) => {
+            if (e.target.files?.[0]) {
+                exports.importJSON(e.target.files[0]);
+                e.target.value = '';
+            }
+        };
+
+        // 库存设置
+        elements.addModelStockBtn.onclick = () => {
+            const newModel = prompt('请输入新型号名称：');
+            if (!newModel?.trim()) return;
+            const trimmed = newModel.trim();
+            
+            if (state.modelStockMap.has(trimmed)) return alert('该型号已存在，可直接编辑');
+            
+            const stock = parseInt(prompt('请输入该型号的总库存数量：', '0'), 10) || 0;
+            state.modelStockMap.set(trimmed, stock);
+            storage.saveStock();
+            render.stockSettings();
+            render.dropdowns();
+            hints.refresh();
+        };
+
+        // 折叠面板
+        elements.inventoryHeader.onclick = () => collapse.toggle('inventory');
+        elements.reminderHeader.onclick = () => collapse.toggle('reminder');
+        elements.stockSettingsHeader.onclick = () => collapse.toggle('stocksettings');
+
+        // 通知权限
+        elements.requestNotifyPermissionBtn.onclick = notifications.request;
+
+        // 汇总模式
+        elements.monthSummaryBtn.onclick = () => {
+            state.summaryMode = 'month';
+            elements.monthSummaryBtn.classList.add('active');
+            elements.yearSummaryBtn.classList.remove('active');
+            render.summary();
+            storage.save();
+        };
+        elements.yearSummaryBtn.onclick = () => {
+            state.summaryMode = 'year';
+            elements.yearSummaryBtn.classList.add('active');
+            elements.monthSummaryBtn.classList.remove('active');
+            render.summary();
+            storage.save();
+        };
+
+        // 输入事件
+        const modelInputHandler = utils.debounce(() => hints.refresh(), 100);
+        elements.modelInput.oninput = modelInputHandler;
+        elements.modelInput.onchange = hints.refresh;
+
+        elements.startDate.onchange = () => {
+            render.inventoryCard();
+            hints.dateStock();
+            render.reminders();
+        };
+        elements.startDate.oninput = elements.startDate.onchange;
+
+        elements.rentalQty.oninput = hints.stockPreview;
+    }
+};
+
+// ========== 初始化 ==========
+const init = () => {
+    storage.load();
+    collapse.apply();
+    events.bind();
+    ui.refresh();
+
+    if (Notification.permission === "default") {
+        setTimeout(() => notifications.request(), 1000);
+    }
+};
+
+// 启动
+init();
+</script>
+</body>
+</html>
